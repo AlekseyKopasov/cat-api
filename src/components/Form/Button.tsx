@@ -1,27 +1,42 @@
 type ButtonType = "button" | "submit" | "reset";
 
-export const Button = ({
-  disabled = false,
-  text,
-  type = 'button'
-}: {
+interface ButtonProps {
   disabled?: boolean;
+  loading?: boolean;
   text: string;
-  type?: ButtonType
+  type?: ButtonType;
+  className?: string;
+}
+
+export const Button: React.FC<ButtonProps> = ({
+  disabled = false,
+  loading = false,
+  text,
+  type = 'button',
+  className = '',
 }) => {
   return (
     <button
       className={`
         border border-blue-300 text-gray-900 text-2xl p-4 border-solid font-sans
-        ${disabled
+        relative
+        ${disabled || loading
           ? 'bg-gray-50 opacity-50 cursor-not-allowed'
           : 'bg-blue-200 cursor-pointer hover:bg-blue-300 transition-colors'
         }
+        ${className}
       `}
       type={type}
-      disabled={disabled}
+      disabled={disabled || loading}
     >
-      {text}
+      {loading ? (
+        <span className="inline-flex items-center">
+          <span className="mr-2">Loading...</span>
+          <span className="animate-spin">↻</span>
+        </span>
+      ) : (
+        text
+      )}
     </button>
   );
 };

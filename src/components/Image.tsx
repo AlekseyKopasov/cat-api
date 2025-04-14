@@ -2,26 +2,30 @@ interface ImageProps {
   url?: string;
   alt?: string;
   className?: string;
-  width?: number;
-  height?: number;
+  width?: number | string;
+  height?: number | string;
+  containerClassName?: string;
 }
 
 export const Image = ({
   url = 'placeholder.png',
   alt = '',
-  className = '',
   width = 256,
-  height = 256
+  height = 256,
+  containerClassName = '',
 }: ImageProps) => {
   return (
-    <div className={`w-full h-full max-w-[320px] max-h-[320px] aspect-square mx-auto border border-blue-300 bg-blue-200 ${className}`}>
+    <div className={`w-[320px] mx-auto border border-blue-300 bg-blue-200 ${containerClassName}`}>
       <img
         src={url}
         alt={alt}
         width={width}
         height={height}
-        className="object-cover max-w-[320px] max-h-[320px] w-full h-full"
+        className="object-cover w-full h-full aspect-square"
+        onError={(e) => {
+          (e.target as HTMLImageElement).src = 'placeholder.png';
+        }}
       />
     </div>
-  )
-}
+  );
+};

@@ -1,87 +1,79 @@
-import { ChangeEvent, FormEvent, useEffect, useState } from 'react'
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react'
+import { useQuery } from 'react-query'
 import { Button } from './Button'
 import { Input } from './Input'
 import { Image } from '../Image'
+import { API_CONFIG } from '../../config'
 
 export const Form = () => {
-  const [catImageUrl, setCatImageUrl] = useState<string>('placeholder.png')
-  const [isLoading, setIsLoading] = useState(false)
-  const [isAutoLoading, setIsAutoLoading] = useState(false)
-  const [isDisabled, setIsDisabled] = useState(true)
   const [isEnabledChecked, setIsEnabledChecked] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [isAutoLoading, setIsAutoLoading] = useState(false)
+
+  const abortControllerRef = useRef<AbortController | null>(null)
+
+  const {
+    data: catImageUrl,
+    error,
+    isLoading,
+    refetch: fetchRandomCat,
+  } = useQuery(
+    'randomCat',
+    async () => {
+      abortControllerRef.current?.abort()
+      abortControllerRef.current = new AbortController()
+
+      const response = await fetch(API_CONFIG.CAT_API_URL, {
+        signal: abortControllerRef.current.signal
+      })
+
+      if (!response.ok) throw new Error('Failed to fetch image')
+
+      const data = await response.json()
+
+      return data[0]?.url || API_CONFIG.PLACEHOLDER_IMAGE
+    },
+    {
+      enabled: false,
+      initialData: API_CONFIG.PLACEHOLDER_IMAGE
+    }
+  )
 
   useEffect(() => {
     let intervalId: number
 
     if (isAutoLoading) {
-      setIsDisabled(true)
       setIsEnabledChecked(false)
       intervalId = window.setInterval(() => {
         fetchRandomCat()
-      }, 5000)
-    } else {
-      setIsDisabled(!isEnabledChecked)
+      }, API_CONFIG.REFRESH_INTERVAL)
     }
 
     return () => {
       clearInterval(intervalId)
-      // if (!isAutoLoading) {
-      //   setIsDisabled(!isEnabledChecked)
-      // }
+      abortControllerRef.current?.abort()
     }
-  }, [isAutoLoading, isEnabledChecked])
+  }, [isAutoLoading, fetchRandomCat])
 
-  const fetchRandomCat = async (evt?: FormEvent) => {
-    evt?.preventDefault()
 
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      const response = await fetch('https://api.thecatapi.com/v1/images/search')
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch image')
-      }
-
-      const data = await response.json()
-      setCatImageUrl(data[0].url || 'placeholder.png')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error...')
-      setCatImageUrl('placeholder.png')
-    } finally {
-      setIsLoading(false)
-    }
+  const handleSubmit = (evt: FormEvent) => {
+    evt.preventDefault()
+    fetchRandomCat()
   }
 
   const handleEnableCheckbox = (evt: ChangeEvent<HTMLInputElement>) => {
     const checked = evt.target.checked
     setIsEnabledChecked(checked)
-    // setIsDisabled(!checked)
-
-    // Если включаем автозагрузку, снимаем отметку с чекбокса Enabled
-    // if (isAutoLoading) {
-    //   setIsEnabledChecked(false)
-    //   setIsDisabled(true)
-    // }
   }
 
   const autoRefresh = (evt: ChangeEvent<HTMLInputElement>) => {
     const checked = evt.target.checked
     setIsAutoLoading(checked)
-
-    // При включении автозагрузки снимаем отметку с чекбокса Enabled
-    if (checked) {
-      setIsEnabledChecked(false)
-      setIsDisabled(true)
-    } else {
-      setIsDisabled(!isEnabledChecked)
-    }
   }
 
+  const isDisabled = !isEnabledChecked || isLoading;
+
   return (
-    <form className='flex flex-col gap-4' onSubmit={fetchRandomCat}>
+    <form className='flex flex-col gap-4' onSubmit={handleSubmit}>
       <Input
         title="Enabled"
         type="checkbox"
@@ -95,17 +87,26 @@ export const Form = () => {
         onChange={autoRefresh}
       />
       <Button
-        disabled={isDisabled || isLoading}
+        disabled={isDisabled}
+        loading={isLoading}
         text={isLoading ? 'Loading...' : 'Get cat'}
         type="submit"
       />
 
-      {error && <p className="text-red-500">{error}</p>}
+      {error != null && (
+        <p className="text-red-500">
+          {error instanceof Error
+            ? error.message
+            : typeof error === 'string'
+              ? error
+              : JSON.stringify(error)}
+        </p>
+      )}
 
       <Image
         url={catImageUrl}
         alt="Random cat"
-        className="mt-8"
+        containerClassName="mt-8"
       />
     </form>
   )
