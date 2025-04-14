@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite --open",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "type-check": "tsc --noEmit",
+    "lint:types": "eslint --ext .ts,.tsx --fix src",
+    "check": "npm run type-check && npm run lint:types",
     "preview": "vite preview"
   },
   "dependencies": {
