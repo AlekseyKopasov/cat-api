@@ -14,13 +14,13 @@ export const Image = ({
   height = 256
 }: ImageProps) => {
   return (
-    <div className='w-64 h-64 p-5 border border-blue-300 bg-blue-200'>
+    <div className="max-w-xs p-5 mx-auto border border-blue-300 bg-blue-200">
       <img
         src={url}
         alt={alt}
         width={width}
         height={height}
-        className={`object-cover max-w-full h-auto ${className}`}
+        className={`object-cover w-full h-full ${className}`}
       />
     </div>
   )

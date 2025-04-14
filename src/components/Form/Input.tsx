@@ -9,7 +9,7 @@ export const Input = (props: InputProps) => {
 
   return (
     <label className='flex gap-2 items-baseline text-2xl font-sans cursor-pointer'>
-      <input className='w-6 h-6' {...otherProps} />
+      <input className={`w-6 h-6 ${otherProps.className || ''}`} />
       <span>{title}</span>
     </label>
   )
