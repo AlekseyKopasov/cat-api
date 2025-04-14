@@ -1,9 +1,9 @@
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react'
 import { useQuery } from 'react-query'
-import { Button } from './Button'
-import { Input } from './Input'
-import { Image } from '../Image'
-import { API_CONFIG } from '../../config'
+import { Button } from '../Button/Button'
+import { Input } from '../Input'
+import { Image } from '../../Image'
+import { API_CONFIG } from '../../../config'
 
 export const Form = () => {
   const [isEnabledChecked, setIsEnabledChecked] = useState(false)
