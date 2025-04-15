@@ -19,10 +19,6 @@ export const Image = ({
 }: ImageProps) => {
   const [currentSrc, setCurrentSrc] = useState(url || 'placeholder.png');
 
-  const handleError = () => {
-    setCurrentSrc('placeholder.png');
-  };
-
   return (
     <div className={`w-[320px] mx-auto border border-blue-300 bg-blue-200 ${containerClassName}`}>
       <img

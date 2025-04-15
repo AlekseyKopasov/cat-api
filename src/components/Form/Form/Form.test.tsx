@@ -10,6 +10,7 @@ jest.mock('../../Image/Image', () => ({
   )
 }))
 
+/* global global */
 global.fetch = jest.fn(() =>
   Promise.resolve({
     ok: true,

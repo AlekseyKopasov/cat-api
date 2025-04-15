@@ -17,7 +17,8 @@ describe('Image component', () => {
   const testAltText = 'Test image';
 
   beforeAll(() => {
-    // @ts-ignore
+    /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
+    //@ts-ignore
     window.Image = MockImage;
   });
 
