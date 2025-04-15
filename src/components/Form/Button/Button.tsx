@@ -26,14 +26,7 @@ export const Button: React.FC<ButtonProps> = ({
       disabled={disabled || loading}
       className={className}
     >
-      {loading ? (
-        <ButtonContent>
-          <Spinner>Loading...</Spinner>
-          <LoadingIcon>↻</LoadingIcon>
-        </ButtonContent>
-      ) : (
-        text
-      )}
+      {text}
     </StyledButton>
   );
 };
