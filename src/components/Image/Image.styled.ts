@@ -2,6 +2,7 @@ import styled from 'styled-components'
 
 export const ImageContainer = styled.div`
   width: 320px;
+  height: 320px;
   margin: 0 auto;
   border: 1px solid #93c5fd; /* blue-300 */
   background-color: #bfdbfe; /* blue-200 */
