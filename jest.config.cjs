@@ -16,9 +16,6 @@ module.exports = {
     ]
   },
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
-  globals: {
-    'ts-jest': {
-      isolatedModules: true
-    }
-  }
+
+  testTimeout: 5000
 };

@@ -1,8 +1,8 @@
 import { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react'
 import { useQuery } from 'react-query'
 import { Button } from '../Button/Button'
-import { Input } from '../Input'
-import { Image } from '../../Image'
+import { Input } from '../Input/Input'
+import { Image } from '../../Image/Image'
 import { API_CONFIG } from '../../../config'
 
 export const Form = () => {

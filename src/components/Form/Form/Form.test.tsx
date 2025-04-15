@@ -1,68 +1,186 @@
-import { screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { renderWithProviders } from '../../../utils/test-utils';
+import { render, screen, waitFor, fireEvent, cleanup } from '@testing-library/react'
+import { Form } from './Form'
+import { useQuery } from 'react-query'
+import { API_CONFIG } from '../../../config'
 
-import { Form } from './Form';
+jest.mock('react-query')
+jest.mock('../../Image/Image', () => ({
+  Image: ({ url, alt }: { url: string; alt: string }) => (
+    <img src={url} alt={alt} data-testid="cat-image" />
+  )
+}))
 
-
-// Мокируем react-query
-jest.mock('react-query', () => ({
-  ...jest.requireActual('react-query'),
-  useQuery: jest.fn().mockReturnValue({
-    data: null,
-    isLoading: false,
-    isError: false,
-    error: null,
-    refetch: jest.fn().mockResolvedValue({ data: [{ url: 'test-cat.jpg' }] })
+global.fetch = jest.fn(() =>
+  Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve([{ url: 'test-cat.jpg' }]),
   })
-}));
+) as jest.Mock
+
+const mockUseQuery = useQuery as jest.Mock
 
 describe('Form component', () => {
-  it('renders form elements', () => {
-    renderWithProviders(<Form />);
-    expect(screen.getByLabelText('Enabled')).toBeInTheDocument();
-    expect(screen.getByText('Get cat')).toBeInTheDocument();
-  });
+  const mockFetchRandomCat = jest.fn()
+  let abortControllerMock: { abort: jest.Mock; signal: AbortSignal }
 
-  it('shows loading state when submitting', async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<Form />);
+  beforeEach(() => {
+    jest.clearAllMocks()
 
-    await user.click(screen.getByLabelText('Enabled'));
-    await user.click(screen.getByText('Get cat'));
+    abortControllerMock = {
+      abort: jest.fn(),
+      signal: {
+        aborted: false,
+        onabort: null,
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+      } as unknown as AbortSignal
+    }
 
-    // Проверяем состояние загрузки через изменение текста кнопки
+    global.AbortController = jest.fn(() => abortControllerMock) as jest.Mock
+
+    mockUseQuery.mockReturnValue({
+      data: API_CONFIG.PLACEHOLDER_IMAGE,
+      error: null,
+      isLoading: false,
+      isFetching: false,
+      refetch: mockFetchRandomCat,
+    })
+  })
+
+  afterEach(() => {
+    cleanup()
+    jest.useRealTimers()
+  })
+
+  it('корректно отображается начальное состояние', () => {
+    render(<Form />)
+
+    expect(screen.getByLabelText('Enabled')).toBeInTheDocument()
+    expect(screen.getByLabelText('Auto-refresh every 5 seconds')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /get cat/i })).toBeInTheDocument()
+    expect(screen.getByTestId('cat-image')).toHaveAttribute('src', API_CONFIG.PLACEHOLDER_IMAGE)
+    expect(screen.getByRole('button', { name: /get cat/i })).toBeDisabled()
+  })
+
+  it('кнопка включается, когда включен чекбокс', () => {
+    render(<Form />)
+
+    const button = screen.getByRole('button', { name: /get cat/i })
+    const enableCheckbox = screen.getByLabelText('Enabled')
+
+    expect(button).toBeDisabled()
+    fireEvent.click(enableCheckbox)
+    expect(button).not.toBeDisabled()
+  })
+
+  it('при отправке формы вызывается fetchRandomCat', async () => {
+    render(<Form />)
+
+    fireEvent.click(screen.getByLabelText('Enabled'))
+    fireEvent.click(screen.getByRole('button', { name: /get cat/i }))
+
     await waitFor(() => {
-      expect(screen.getByRole('button')).toHaveTextContent('Loading...');
-    });
-  });
+      expect(mockFetchRandomCat).toHaveBeenCalledTimes(1)
+    })
+  })
 
-  it('handles successful form submission', async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<Form />);
+  it('показывается состояние загрузки при получении данных', () => {
+    mockUseQuery.mockReturnValue({
+      data: API_CONFIG.PLACEHOLDER_IMAGE,
+      error: null,
+      isLoading: true,
+      isFetching: true,
+      refetch: mockFetchRandomCat,
+    })
 
-    await user.click(screen.getByLabelText('Enabled'));
-    await user.click(screen.getByText('Get cat'));
+    render(<Form />)
 
-    // Ждем завершения "загрузки"
+    const button = screen.getByRole('button')
+    expect(button).toHaveTextContent(/loading/i)
+    expect(button).toBeDisabled()
+  })
+
+  it('отображается сообщение об ошибке', () => {
+    const errorMessage = 'Failed to fetch image'
+    mockUseQuery.mockReturnValue({
+      data: API_CONFIG.PLACEHOLDER_IMAGE,
+      error: new Error(errorMessage),
+      isLoading: false,
+      refetch: mockFetchRandomCat,
+    })
+
+    render(<Form />)
+
+    expect(screen.getByText(errorMessage)).toBeInTheDocument()
+  })
+
+  it('запускается автоматическое обновление', async () => {
+    jest.useFakeTimers()
+    render(<Form />)
+
+    fireEvent.click(screen.getByLabelText('Enabled'))
+    fireEvent.click(screen.getByLabelText('Auto-refresh every 5 seconds'))
+
+    jest.advanceTimersByTime(API_CONFIG.REFRESH_INTERVAL)
+
     await waitFor(() => {
-      expect(screen.getByRole('button')).toHaveTextContent('Get cat');
-    });
-  });
+      expect(mockFetchRandomCat).toHaveBeenCalledTimes(1)
+    })
+  })
 
-  it('handles API error', async () => {
-    // Мокируем ошибку
-    jest.spyOn(require('react-query'), 'useQuery').mockReturnValueOnce({
-      isError: true,
-      error: new Error('API error'),
-      refetch: jest.fn()
-    });
+  it('отменяется предыдущий запрос при поступлении нового', async () => {
+    mockUseQuery.mockImplementation((_, fn) => {
+      const result = fn()
+      return {
+        data: result,
+        error: null,
+        isLoading: false,
+        refetch: mockFetchRandomCat,
+      }
+    })
 
-    renderWithProviders(<Form />);
+    render(<Form />)
 
-    // Проверяем отображение ошибки
+    fireEvent.click(screen.getByLabelText('Enabled'))
+    fireEvent.click(screen.getByRole('button', { name: /get cat/i }))
+
     await waitFor(() => {
-      expect(screen.getByText('API error')).toBeInTheDocument();
-    });
-  });
-});
+      expect(abortControllerMock.abort).toHaveBeenCalled()
+    })
+  })
+
+  it('таймеры очищаются при размонтировании', () => {
+    jest.useFakeTimers()
+    const { unmount } = render(<Form />)
+
+    fireEvent.click(screen.getByLabelText('Enabled'))
+    fireEvent.click(screen.getByLabelText('Auto-refresh every 5 seconds'))
+
+    unmount()
+
+    expect(jest.getTimerCount()).toBe(0)
+  })
+
+  it('прерывает активный запрос при размонтировании', async () => {
+    mockUseQuery.mockImplementation((_, queryFn) => {
+      queryFn()
+      return {
+        data: API_CONFIG.PLACEHOLDER_IMAGE,
+        error: null,
+        isLoading: false,
+        isFetching: true,
+        refetch: mockFetchRandomCat,
+      }
+    })
+
+    const { unmount } = render(<Form />)
+
+    // время на создание AbortController
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    unmount()
+
+    expect(abortControllerMock.abort).toHaveBeenCalled()
+  })
+})

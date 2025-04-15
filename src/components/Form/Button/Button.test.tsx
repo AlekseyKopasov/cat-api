@@ -3,17 +3,17 @@ import '@testing-library/jest-dom';
 import { Button } from './Button';
 
 describe('Button component', () => {
-  it('renders button with text', () => {
+  it('отображается кнопка с текстом', () => {
     render(<Button text="Click me" />);
     expect(screen.getByText('Click me')).toBeInTheDocument();
   });
 
-  it('shows loading state', () => {
+  it('показывается состояние загрузки', () => {
     render(<Button text="Submit" loading={true} />);
     expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
-  it('is disabled when disabled prop is true', () => {
+  it('кнопка отключена, когда disabled: true', () => {
     render(<Button text="Submit" disabled={true} />);
     expect(screen.getByRole('button')).toBeDisabled();
   });
