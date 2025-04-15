@@ -1,4 +1,5 @@
-import React, { InputHTMLAttributes } from 'react';
+import React, { InputHTMLAttributes } from 'react'
+import { InputLabel, InputField } from './Input.styled'
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   title: string;
@@ -13,12 +14,9 @@ export const Input: React.FC<InputProps> = ({
 }) => {
 
   return (
-    <label className={`flex gap-2 items-center text-xl font-sans cursor-pointer ${wrapperClassName}`}>
-      <input
-        className={`w-6 h-6 border border-blue-300 ${className}`}
-        {...props}
-      />
+    <InputLabel className={wrapperClassName}>
+      <InputField className={className} {...props} />
       <span>{title}</span>
-    </label>
+    </InputLabel>
   );
 };

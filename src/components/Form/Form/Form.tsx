@@ -4,6 +4,7 @@ import { Button } from '../Button/Button'
 import { Input } from '../Input/Input'
 import { Image } from '../../Image/Image'
 import { API_CONFIG } from '../../../config'
+import { FormContainer } from './Form.styled'
 
 export const Form = () => {
   const [isEnabledChecked, setIsEnabledChecked] = useState(false)
@@ -73,7 +74,7 @@ export const Form = () => {
   const isDisabled = !isEnabledChecked || isLoading;
 
   return (
-    <form className='flex flex-col gap-4' onSubmit={handleSubmit}>
+    <FormContainer onSubmit={handleSubmit}>
       <Input
         title="Enabled"
         type="checkbox"
@@ -106,8 +107,7 @@ export const Form = () => {
       <Image
         url={catImageUrl}
         alt="Random cat"
-        containerClassName="mt-8"
       />
-    </form>
+    </FormContainer>
   )
 }

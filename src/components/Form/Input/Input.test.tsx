@@ -1,5 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import { Input } from './Input';
+import { render, screen, fireEvent } from '@testing-library/react'
+import { Input } from './Input'
 
 describe('Input component', () => {
   const baseProps = {
@@ -15,7 +15,6 @@ describe('Input component', () => {
 
     expect(input).toBeInTheDocument();
     expect(input).toHaveAttribute('type', 'checkbox');
-    expect(input).toHaveClass('w-6 h-6 border border-blue-300');
     expect(label).toBeInTheDocument();
   });
 
@@ -25,7 +24,6 @@ describe('Input component', () => {
 
     const input = screen.getByLabelText(baseProps.title);
     expect(input).toHaveClass(customClass);
-    expect(input).toHaveClass('w-6 h-6 border border-blue-300');
   });
 
   it('применяется wrapperClassName', () => {
@@ -34,7 +32,6 @@ describe('Input component', () => {
 
     const label = screen.getByText(baseProps.title).parentElement;
     expect(label).toHaveClass(wrapperClass);
-    expect(label).toHaveClass('flex gap-2 items-center text-xl font-sans cursor-pointer');
   });
 
   it('корректно передаются все входные реквизиты', () => {

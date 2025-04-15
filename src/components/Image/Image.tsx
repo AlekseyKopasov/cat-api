@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'
+import { ImageContainer, StyledImage } from './Image.styled'
 
 interface ImageProps {
   url?: string;
@@ -14,7 +15,6 @@ export const Image = ({
   alt = '',
   width = 256,
   height = 256,
-  containerClassName = '',
   ...props
 }: ImageProps) => {
   const [currentSrc, setCurrentSrc] = useState(url || 'placeholder.png');
@@ -28,8 +28,8 @@ export const Image = ({
   };
 
   return (
-    <div className={`w-[320px] mx-auto border border-blue-300 bg-blue-200 ${containerClassName}`}>
-      <img
+    <ImageContainer {...props}>
+      <StyledImage
         src={currentSrc}
         alt={alt}
         width={width}
@@ -38,6 +38,6 @@ export const Image = ({
         onError={handleError}
         {...props}
       />
-    </div>
+    </ImageContainer>
   );
 };

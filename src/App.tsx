@@ -1,10 +1,11 @@
 import { Form } from './components/Form/Form/Form'
+import { AppContainer } from './App.styled'
 
 function App() {
   return (
-    <div className='flex flex-col gap-12 items-center justify-center max-w-[320px] min-h-screen m-auto'>
+    <AppContainer>
       <Form />
-    </div>
+    </AppContainer>
   )
 }
 

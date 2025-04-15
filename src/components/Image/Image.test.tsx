@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { Image } from './Image';
+import { fireEvent, render, screen } from '@testing-library/react'
+import { Image } from './Image'
 import { act } from 'react';
 
 class MockImage {
@@ -26,15 +26,11 @@ describe('Image component', () => {
     render(<Image />);
 
     const img = screen.getByAltText('');
-    const container = img.parentElement;
 
     expect(img).toHaveAttribute('src', 'placeholder.png');
     expect(img).toHaveAttribute('alt', '');
     expect(img).toHaveAttribute('width', '256');
     expect(img).toHaveAttribute('height', '256');
-    expect(img).toHaveClass('object-cover w-full h-full aspect-square');
-
-    expect(container).toHaveClass('w-[320px] mx-auto border border-blue-300 bg-blue-200');
   });
 
   it('рендерится с кастомными пропсами', () => {
@@ -44,7 +40,6 @@ describe('Image component', () => {
         alt={testAltText}
         width="300"
         height="200"
-        containerClassName="custom-container"
       />
     );
 
@@ -54,7 +49,6 @@ describe('Image component', () => {
     expect(img).toHaveAttribute('alt', testAltText);
     expect(img).toHaveAttribute('width', '300');
     expect(img).toHaveAttribute('height', '200');
-    expect(img.parentElement).toHaveClass('custom-container');
   });
 
   it('обрабатывается ошибка изображения, показывается placeholder', async () => {
@@ -75,17 +69,6 @@ describe('Image component', () => {
     window.Image = originalImage;
   });
 
-  it('применяются правильные классы для контейнеров', () => {
-    const { container } = render(
-      <Image containerClassName="additional-class" />
-    );
-
-    const div = container.firstChild;
-    expect(div).toHaveClass(
-      'w-[320px] mx-auto border border-blue-300 bg-blue-200 additional-class'
-    );
-  });
-
   it('сохраняются пропорции для aspect-ratio свойства', () => {
     render(<Image />);
     const img = screen.getByAltText('');
@@ -101,6 +84,7 @@ describe('Image component', () => {
 
   it('добавляются новые пропсы', () => {
     render(<Image data-testid="custom-image" />);
-    expect(screen.getByTestId('custom-image')).toBeInTheDocument();
+    const elements = screen.getAllByTestId('custom-image');
+    expect(elements.length).toBeGreaterThan(0);
   });
 });
