@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface ImageProps {
   url?: string;
@@ -19,6 +19,14 @@ export const Image = ({
 }: ImageProps) => {
   const [currentSrc, setCurrentSrc] = useState(url || 'placeholder.png');
 
+  useEffect(() => {
+    setCurrentSrc(url || 'placeholder.png');
+  }, [url]);
+
+  const handleError = () => {
+    setCurrentSrc('placeholder.png')
+  };
+
   return (
     <div className={`w-[320px] mx-auto border border-blue-300 bg-blue-200 ${containerClassName}`}>
       <img
@@ -27,7 +35,7 @@ export const Image = ({
         width={width}
         height={height}
         className="object-cover w-full h-full aspect-square"
-        onError={() => setCurrentSrc('placeholder.png')}
+        onError={handleError}
         {...props}
       />
     </div>

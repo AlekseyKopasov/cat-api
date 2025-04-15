@@ -46,10 +46,10 @@ importers:
         specifier: ^22.14.1
         version: 22.14.1
       '@types/react':
-        specifier: ^19.0.10
+        specifier: ^19.1.2
         version: 19.1.2
       '@types/react-dom':
-        specifier: ^19.0.4
+        specifier: ^19.1.2
         version: 19.1.2(@types/react@19.1.2)
       '@types/whatwg-fetch':
         specifier: ^0.0.33
