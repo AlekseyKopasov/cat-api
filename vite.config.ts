@@ -7,5 +7,8 @@ export default defineConfig({
   define: {
     'process.env': {}
   },
-  base: 'cat-api',
+  base: '/cat-api/',
+  build: {
+    outDir: 'dist'
+  }
 });

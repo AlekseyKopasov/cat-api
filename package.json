@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "homepage": "https://AlekseyKopasov.github.io/cats-api",
   "scripts": {
     "dev": "vite --open",
     "build": "tsc -b && vite build",
@@ -11,8 +12,8 @@
     "check": "npm run type-check && npm run lint:types",
     "preview": "vite preview",
     "test": "jest --verbose",
-    "predeploy": "pnpm build",
-    "deploy": "gh-pages -d dist"
+    "predeploy": "vite build",
+    "deploy": "npx gh-pages -d dist"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.3",
